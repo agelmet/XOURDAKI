@@ -364,6 +364,17 @@ a img.h-4.bg-white{padding:0;box-shadow:0 0 0 4px #fff;border-radius:1px;width:a
  .js .reveal,.js .mx-h1 .w,.js .lc .lc-c,.js .lc .lc-w,.js .lc .lc-w > span,.js .mx-paras > *,.js .mx-acc > div,#contact li,.mx-leaves{opacity:1!important;transform:none!important}
  .mx-arch{scale:1!important;rotate:0deg!important}.mx-gal > div:first-child::after{display:none}.amb{display:none}.mx-intro{display:none}
  .mx-stars svg{opacity:1;transform:none}.mx-draw *{stroke-dashoffset:0!important}.mx-steps::after{transform:none}}
+/* 13 Oct 2026 — the logo's line reaches «ΒΙΟΓΡΑΦΙΚΟ» (desktop) */
+.mx-tail{display:none}
+@media (min-width:1280px){
+ .mx-logo{-webkit-mask-image:none;mask-image:none}
+ #navbar > div:first-child{position:relative}
+ .mx-tail{display:block;position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:0}
+ #navbar .lg-mr{width:2802px}
+ .mx-tail path{fill:none;stroke:#4F4B3E;stroke-width:.95;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:0}
+ .mx-tail.draw path{stroke-dashoffset:1}
+ .mx-tail.go path{stroke-dashoffset:0;transition:stroke-dashoffset 1.3s cubic-bezier(.65,0,.35,1) .2s}
+ #navbar .md\:flex{position:relative;z-index:1}}
 </style>
 </head>
 <body id="top" class="font-sans antialiased overflow-x-hidden selection:bg-brand-dark selection:text-brand-base">
@@ -1219,6 +1230,28 @@ a img.h-4.bg-white{padding:0;box-shadow:0 0 0 4px #fff;border-radius:1px;width:a
   plan.forEach(function(p){ var s=d.querySelector(p[0]); if(!s)return; s.classList.add('mx-amb-host');
    var a=d.createElement('div'); a.className='amb off'; a.setAttribute('aria-hidden','true'); a.innerHTML=p[1]; s.insertBefore(a,s.firstChild); aIO.observe(a)}); }
 
+
+ /* 12 · the logo's line flows on and reaches the first menu link (desktop ≥1280) */
+ (function(){
+  var row=nav&&nav.firstElementChild, svg=d.querySelector('#navbar .mx-logo-svg'), first=d.querySelector('#navbar .md\\:flex > a');
+  if(!row||!svg||!first||!svg.getScreenCTM)return;
+  var NS='http://www.w3.org/2000/svg', t=d.createElementNS(NS,'svg'), p=d.createElementNS(NS,'path');
+  t.setAttribute('class','mx-tail'); t.setAttribute('aria-hidden','true'); p.setAttribute('pathLength','1'); t.appendChild(p); row.insertBefore(t,row.firstChild);
+  var mq=matchMedia('(min-width:1280px)');
+  function pt(x,y){var q=svg.createSVGPoint();q.x=x;q.y=y;return q.matrixTransform(svg.getScreenCTM())}
+  function draw(){ if(!mq.matches)return; var o=row.getBoundingClientRect(), a=pt(2800,797), b=pt(2838,794.6), r=first.getBoundingClientRect();
+   var x0=b.x-o.left, y0=b.y-o.top, dx=b.x-a.x, dy=b.y-a.y, n=Math.hypot(dx,dy)||1; dx/=n; dy/=n;
+   var x1=r.left-o.left-12, y1=r.top-o.top+r.height*.6, L=Math.max(20,x1-x0);
+   if(x1<=x0+8){p.setAttribute('d','');return}
+   var c1=Math.min(70,L*.32), c2=L*.46;
+   p.setAttribute('d','M'+x0.toFixed(1)+' '+y0.toFixed(1)+' C'+(x0+dx*c1).toFixed(1)+' '+(y0+dy*c1).toFixed(1)+' '+(x1-c2).toFixed(1)+' '+y1.toFixed(1)+' '+x1.toFixed(1)+' '+y1.toFixed(1)); }
+  var until=0; function loop(){draw(); if(performance.now()<until)requestAnimationFrame(loop)}
+  function burst(ms){var go=!until||performance.now()>until; until=performance.now()+(ms||900); if(go)requestAnimationFrame(loop)}
+  draw();
+  if(!RM&&!d.hidden){ t.classList.add('draw'); setTimeout(function(){draw();t.classList.add('go')}, de.classList.contains('mx-intro-run')?1500:450) }
+  new MutationObserver(function(){burst(900)}).observe(nav,{attributes:true,attributeFilter:['class']});
+  addEventListener('resize',function(){burst(300)}); if(d.fonts&&d.fonts.ready)d.fonts.ready.then(draw); addEventListener('load',draw);
+ })();
  /* 11 · a reveal that is still waiting when the tab was in the background: show it */
  if(d.hidden||RM) $$('.reveal').forEach(function(e){e.classList.add('active')});
  setTimeout(function(){ $$('.reveal').forEach(function(e){ var r=e.getBoundingClientRect(); if(r.top<innerHeight&&r.bottom>0)e.classList.add('active') }) },2500);
